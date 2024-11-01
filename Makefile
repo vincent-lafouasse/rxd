@@ -4,6 +4,7 @@ SRCS = $(shell find src -name '*.c')
 
 CC ?= cc
 CFLAGS += -Wall -Wextra -g3
+CFLAGS += -std=c99 -pedantic
 # CFLAGS += -Werror
 CPPFLAGS += -Isrc -MMD -MP
 
