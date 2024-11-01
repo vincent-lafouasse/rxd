@@ -8,10 +8,15 @@
 typedef struct {
     size_t line_width;  // 0 means one line
     size_t offset_width;
+    int fd_in;
+    int fd_out;
 } DisplayConfig;
 
 DisplayConfig default_config(void) {
-    return (DisplayConfig){.line_width = 16, .offset_width = 8};
+    return (DisplayConfig){.line_width = 16,
+                           .offset_width = 8,
+                           .fd_in = STDIN_FILENO,
+                           .fd_out = STDOUT_FILENO};
 }
 
 void putstr(const char* s, int fd) {
@@ -24,7 +29,7 @@ bool is_printable(char c) {
 }
 
 // displays non printable characters as dots
-void display_ascii_with_dots(const char* input, int fd, DisplayConfig cfg) {
+void display_ascii_with_dots(const char* input, DisplayConfig cfg) {
     assert(cfg.line_width != 0);
     char* line = calloc(cfg.line_width + 1, 1);
     strncpy(line, input, cfg.line_width);
@@ -35,7 +40,7 @@ void display_ascii_with_dots(const char* input, int fd, DisplayConfig cfg) {
         }
     }
 
-    putstr(line, fd);
+    putstr(line, cfg.fd_out);
     free(line);
 }
 
@@ -48,15 +53,15 @@ int main(void) {
     size_t bytes_read;
     size_t offset = 0;
 
-    bytes_read = read(STDIN_FILENO, line, cfg.line_width);
+    bytes_read = read(cfg.fd_in, line, cfg.line_width);
     while (bytes_read > 0) {
         printf("%04zx: ", offset);
         fflush(stdout);
         offset += bytes_read;
-        display_ascii_with_dots(line, STDOUT_FILENO, cfg);
-        putstr("\n", STDOUT_FILENO);
+        display_ascii_with_dots(line, cfg);
+        putstr("\n", cfg.fd_out);
         memset(line, 0, cfg.line_width + 1);
-        bytes_read = read(STDIN_FILENO, line, cfg.line_width);
+        bytes_read = read(cfg.fd_in, line, cfg.line_width);
     }
     free(line);
 }
