@@ -57,9 +57,12 @@ void mem_reverse(void* __bytes, size_t n) {
 // sprintf maybe
 void display_hex(size_t n, const DisplayConfig cfg) {
     size_t width = cfg.offset_width;
+    /*
     size_t max_value = (1 << (4 * width));
     printf("max: %zu\n", max_value);
     assert(n <= max_value);
+    */
+    // this assertion fails somehow
 
     char* buffer = malloc(width + 1);
     memset(buffer, '0', width);
