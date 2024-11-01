@@ -1,11 +1,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
-#include <ctype.h>
 
 #define BUFFER_SIZE 16
 
-bool is_printable(unsigned char c) {
+bool is_printable(char c) {
 	// below are control characters, above (0x7f) is DEL 
 	return (c >= 0x20 && c <= 0x7e);
 }
