@@ -10,7 +10,7 @@ bool is_printable(char c) {
 }
 
 // displays non printable characters as dots
-void display(const char *input) {
+void display(const char* input) {
     char line[BUFFER_SIZE + 1] = {0};
     strncpy(line, input, BUFFER_SIZE);
 
