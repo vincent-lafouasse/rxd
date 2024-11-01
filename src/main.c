@@ -45,10 +45,16 @@ void display_ascii_with_dots(const char* input, DisplayConfig cfg) {
 }
 
 // sprintf maybe
-void display_hex(size_t offset, size_t n_digits);
+void display_hex(size_t offset, DisplayConfig cfg) {
+    size_t max_value = (1 << (4 * cfg.offset_width)) - 1;
+    assert(offset <= max_value);
+
+    char* buffer = malloc(cfg.line_width + 1);
+    free(buffer);
+}
 
 int main(void) {
-    DisplayConfig cfg = default_config();
+    const DisplayConfig cfg = default_config();
     char* line = calloc(cfg.line_width + 1, 1);
     size_t bytes_read;
     size_t offset = 0;
