@@ -1,32 +1,20 @@
 #include <assert.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 typedef struct {
     size_t line_width;  // 0 means one line
-    size_t offset_width;
+    size_t offset_width; // number of hex digits
     int fd_in;
     int fd_out;
 } DisplayConfig;
 
-DisplayConfig default_config(void) {
-    return (DisplayConfig){.line_width = 16,
-                           .offset_width = 8,
-                           .fd_in = STDIN_FILENO,
-                           .fd_out = STDOUT_FILENO};
-}
-
-void putstr(const char* s, int fd) {
-    write(fd, s, strlen(s));
-}
-
-bool is_printable(char c) {
-    // below are control characters, above (0x7f) is DEL
-    return (c >= 0x20 && c <= 0x7e);
-}
+DisplayConfig default_config(void);
+void putstr(const char* s, int fd);
+void mem_reverse(void* __bytes, size_t n);
+bool is_printable(char c);
 
 // displays non printable characters as dots
 void display_ascii_with_dots(const char* input, const DisplayConfig cfg) {
@@ -44,17 +32,6 @@ void display_ascii_with_dots(const char* input, const DisplayConfig cfg) {
     free(line);
 }
 
-void mem_reverse(void* __bytes, size_t n) {
-    unsigned char* bytes = __bytes;
-
-    for (size_t i = 0; i < n / 2; i++) {
-        unsigned char tmp = bytes[i];
-        bytes[i] = bytes[n - 1 - i];
-        bytes[n - 1 - i] = tmp;
-    }
-}
-
-// sprintf maybe
 void display_hex(size_t n, const DisplayConfig cfg) {
     size_t width = cfg.offset_width;
     /*
@@ -98,4 +75,30 @@ int main(void) {
         bytes_read = read(cfg.fd_in, line, cfg.line_width);
     }
     free(line);
+}
+
+DisplayConfig default_config(void) {
+    return (DisplayConfig){.line_width = 16,
+                           .offset_width = 8,
+                           .fd_in = STDIN_FILENO,
+                           .fd_out = STDOUT_FILENO};
+}
+
+void putstr(const char* s, int fd) {
+    write(fd, s, strlen(s));
+}
+
+bool is_printable(char c) {
+    // below are control characters, above (0x7f) is DEL
+    return (c >= 0x20 && c <= 0x7e);
+}
+
+void mem_reverse(void* __bytes, size_t n) {
+    unsigned char* bytes = __bytes;
+
+    for (size_t i = 0; i < n / 2; i++) {
+        unsigned char tmp = bytes[i];
+        bytes[i] = bytes[n - 1 - i];
+        bytes[n - 1 - i] = tmp;
+    }
 }
