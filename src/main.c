@@ -62,10 +62,21 @@ void display_bytes_ascii(const char* line, const DisplayConfig cfg) {
     assert(cfg.line_width != 0);
 
     for (size_t i = 0; i < cfg.line_width; i++) {
-        if (is_printable(line[i]))
-            fprintf(cfg.out, KGRN "%c" KNRM, line[i]);
+        unsigned char c = line[i];
+        if (c == 0x00)
+            fprintf(cfg.out, KWHT);
+        else if (c == 0xff)
+            fprintf(cfg.out, KBLU);
+        else if (isspace(c))
+            fprintf(cfg.out, KYEL);
+        else if (is_printable(c))
+            fprintf(cfg.out, KGRN);
         else
-            fprintf(cfg.out, KYEL "." KNRM);
+            fprintf(cfg.out, KRED);
+        if (is_printable(line[i]))
+            fprintf(cfg.out, "%c" KNRM, line[i]);
+        else
+            fprintf(cfg.out, "." KNRM);
     }
 }
 
