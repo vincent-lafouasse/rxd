@@ -14,14 +14,6 @@
 #define KMAG "\x1B[35m"
 #define KWHT "\x1B[37m"
 
-/*
-0x00 = white
-0xff = blue
-printable = green
-non-printable = red
-tabs and linebreaks = yellow
-*/
-
 typedef uint8_t u8;
 typedef uint32_t u32;
 
@@ -32,6 +24,15 @@ typedef struct {
 } DisplayConfig;
 
 DisplayConfig default_config(void);
+
+/*
+0x00 = white
+0xff = blue
+printable = green
+non-printable = red
+tabs and linebreaks = yellow
+*/
+void set_correct_color(u8 c, DisplayConfig cfg);
 bool is_printable(u8 c);
 
 void display_bytes_hex(const u8* input, const DisplayConfig cfg) {
@@ -39,16 +40,7 @@ void display_bytes_hex(const u8* input, const DisplayConfig cfg) {
 
     for (size_t i = 0; i < cfg.line_width; i++) {
         u8 c = input[i];
-        if (c == 0x00)
-            fprintf(cfg.out, KWHT);
-        else if (c == 0xff)
-            fprintf(cfg.out, KBLU);
-        else if (isspace(c))
-            fprintf(cfg.out, KYEL);
-        else if (is_printable(c))
-            fprintf(cfg.out, KGRN);
-        else
-            fprintf(cfg.out, KRED);
+        set_correct_color(c, cfg);
         fprintf(cfg.out, "%02x", (u32)c);
         fprintf(cfg.out, KNRM);
         if (i % 2 == 1) {
@@ -62,17 +54,7 @@ void display_bytes_ascii(const u8* line, const DisplayConfig cfg) {
     assert(cfg.line_width != 0);
 
     for (size_t i = 0; i < cfg.line_width; i++) {
-        u8 c = line[i];
-        if (c == 0x00)
-            fprintf(cfg.out, KWHT);
-        else if (c == 0xff)
-            fprintf(cfg.out, KBLU);
-        else if (isspace(c))
-            fprintf(cfg.out, KYEL);
-        else if (is_printable(c))
-            fprintf(cfg.out, KGRN);
-        else
-            fprintf(cfg.out, KRED);
+        set_correct_color(line[i], cfg);
         if (is_printable(line[i]))
             fprintf(cfg.out, "%c" KNRM, line[i]);
         else
@@ -102,6 +84,19 @@ int main(void) {
 
 DisplayConfig default_config(void) {
     return (DisplayConfig){.line_width = 16, .in = stdin, .out = stdout};
+}
+
+void set_correct_color(u8 c, DisplayConfig cfg) {
+    if (c == 0x00)
+        fprintf(cfg.out, KWHT);
+    else if (c == 0xff)
+        fprintf(cfg.out, KBLU);
+    else if (isspace(c))
+        fprintf(cfg.out, KYEL);
+    else if (is_printable(c))
+        fprintf(cfg.out, KGRN);
+    else
+        fprintf(cfg.out, KRED);
 }
 
 bool is_printable(u8 c) {
