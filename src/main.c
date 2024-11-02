@@ -1,58 +1,18 @@
 #include <assert.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
-#define KNRM  "\x1B[0m"
-#define KRED  "\x1B[31m"
-#define KGRN  "\x1B[32m"
-#define KYEL  "\x1B[33m"
-#define KBLU  "\x1B[34m"
-#define KMAG  "\x1B[35m"
-#define KWHT  "\x1B[37m"
-
-enum Color {
-    WHITE,
-    BLUE,
-    GREEN,
-    RED,
-    YELLOW,
-};
-
-int fprintf_colored(enum Color color, FILE* f, const char *format, ...)
-{
-    switch (color) {
-        case WHITE:
-            fprintf(f, KWHT);
-            break;
-        case BLUE:
-            fprintf(f, KBLU);
-            break;
-        case GREEN:
-            fprintf(f, KGRN);
-            break;
-        case RED:
-            fprintf(f, KRED);
-            break;
-        case YELLOW:
-            fprintf(f, KYEL);
-            break;
-        default:
-            fprintf(f, KNRM);
-    }
-
-    va_list args;
-    va_start(args, format);
-    int status = fprintf(f, format, args);
-    va_end(args);
-
-    fprintf(f, KNRM);
-
-    return status;
-}
+#define KNRM "\x1B[0m"
+#define KRED "\x1B[31m"
+#define KGRN "\x1B[32m"
+#define KYEL "\x1B[33m"
+#define KBLU "\x1B[34m"
+#define KMAG "\x1B[35m"
+#define KWHT "\x1B[37m"
 
 /*
 0x00 = white
@@ -72,8 +32,6 @@ typedef struct {
 } DisplayConfig;
 
 DisplayConfig default_config(void);
-void putstr(const char* s, int fd);
-void mem_reverse(void* __bytes, size_t n);
 bool is_printable(char c);
 
 void display_bytes_hex(const char* input, const DisplayConfig cfg) {
@@ -93,9 +51,9 @@ void display_bytes_ascii(const char* line, const DisplayConfig cfg) {
 
     for (size_t i = 0; line[i] && i < cfg.line_width; i++) {
         if (is_printable(line[i]))
-            fprintf_colored(GREEN, cfg.out, "%c", line[i]);
+            fprintf(cfg.out, KGRN "%c" KNRM, line[i]);
         else
-            fprintf_colored(YELLOW, cfg.out, ".");
+            fprintf(cfg.out, KYEL "." KNRM);
     }
 }
 
