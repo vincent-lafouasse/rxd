@@ -36,7 +36,7 @@ void display_ascii_with_dots(const char* input, const DisplayConfig cfg) {
 }
 
 void display_hex(u32 n, const DisplayConfig cfg) {
-    size_t width = sizeof(n);
+    size_t width = 2 * sizeof(n); // 2 hex per byte
 
     char* buffer = malloc(width + 1);
     memset(buffer, '0', width);
