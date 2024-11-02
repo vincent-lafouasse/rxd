@@ -37,7 +37,7 @@ bool is_printable(char c);
 void display_bytes_hex(const char* input, const DisplayConfig cfg) {
     assert(cfg.line_width != 0);
 
-    for (size_t i = 0; input[i] && i < cfg.line_width; i++) {
+    for (size_t i = 0; i < cfg.line_width; i++) {
         fprintf(cfg.out, "%02x", (u32)input[i]);
         if (i % 2 == 1) {
             fprintf(cfg.out, " ");
@@ -49,7 +49,7 @@ void display_bytes_hex(const char* input, const DisplayConfig cfg) {
 void display_bytes_ascii(const char* line, const DisplayConfig cfg) {
     assert(cfg.line_width != 0);
 
-    for (size_t i = 0; line[i] && i < cfg.line_width; i++) {
+    for (size_t i = 0; i < cfg.line_width; i++) {
         if (is_printable(line[i]))
             fprintf(cfg.out, KGRN "%c" KNRM, line[i]);
         else
