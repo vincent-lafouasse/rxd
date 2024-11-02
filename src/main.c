@@ -38,7 +38,12 @@ void display_bytes_hex(const char* input, const DisplayConfig cfg) {
     assert(cfg.line_width != 0);
 
     for (size_t i = 0; i < cfg.line_width; i++) {
+        if (is_printable(input[i]))
+            fprintf(cfg.out, KGRN);
+        else
+            fprintf(cfg.out, KYEL);
         fprintf(cfg.out, "%02x", (u32)input[i]);
+        fprintf(cfg.out, KNRM);
         if (i % 2 == 1) {
             fprintf(cfg.out, " ");
         }
