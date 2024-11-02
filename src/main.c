@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -13,8 +14,8 @@ typedef uint32_t u32;
 
 typedef struct {
     size_t line_width;  // 0 means one line
-    int fd_in;
-    int fd_out;
+    FILE* in;
+    FILE* out;
 } DisplayConfig;
 
 DisplayConfig default_config(void);
@@ -96,8 +97,7 @@ int main(void) {
 }
 
 DisplayConfig default_config(void) {
-    return (DisplayConfig){
-        .line_width = 16, .fd_in = STDIN_FILENO, .fd_out = STDOUT_FILENO};
+    return (DisplayConfig){.line_width = 16, .in = stdin, .out = stdout};
 }
 
 void putstr(const char* s, int fd) {
