@@ -5,6 +5,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#define LOWERCASE_HEX "0123456789abcdef"
+#define UPPERCASE_HEX "0123456789abcdef"
+
 typedef uint8_t u8;
 typedef uint32_t u32;
 
@@ -19,7 +22,21 @@ void putstr(const char* s, int fd);
 void mem_reverse(void* __bytes, size_t n);
 bool is_printable(char c);
 
-void display_bytes_hex(const char* input, const DisplayConfig cfg);
+void display_bytes_hex(const char* input, const DisplayConfig cfg) {
+    assert(cfg.line_width != 0);
+
+    char* buffer = malloc(3 * cfg.line_width +
+                          1);  // each bytes needs 2 hex digits and a space
+    buffer[3 * cfg.line_width] = '\0';
+    for (size_t i = 0; i < cfg.line_width; i++) {
+        u8 byte = input[i];
+        buffer[3 * i] = LOWERCASE_HEX[byte / 16];
+        buffer[3 * i + 1] = LOWERCASE_HEX[byte % 16];
+        buffer[3 * i + 2] = ' ';
+    }
+    putstr(buffer, cfg.fd_out);
+    free(buffer);
+}
 
 // displays non printable characters as dots
 void display_bytes_ascii(const char* input, const DisplayConfig cfg) {
@@ -68,6 +85,8 @@ int main(void) {
         display_u32_hex(offset, cfg);
         putstr(": ", cfg.fd_out);
         offset += bytes_read;
+        display_bytes_hex(line, cfg);
+        putstr(" ", cfg.fd_out);
         display_bytes_ascii(line, cfg);
         putstr("\n", cfg.fd_out);
         memset(line, 0, cfg.line_width + 1);
