@@ -91,7 +91,7 @@ void set_correct_color(u8 c, DisplayConfig cfg) {
         fprintf(cfg.out, KWHT);
     else if (c == 0xff)
         fprintf(cfg.out, KBLU);
-    else if (isspace(c))
+    else if (isspace(c) && c != ' ')
         fprintf(cfg.out, KYEL);
     else if (is_printable(c))
         fprintf(cfg.out, KGRN);
