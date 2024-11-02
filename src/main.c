@@ -32,13 +32,13 @@ typedef struct {
 } DisplayConfig;
 
 DisplayConfig default_config(void);
-bool is_printable(char c);
+bool is_printable(u8 c);
 
-void display_bytes_hex(const char* input, const DisplayConfig cfg) {
+void display_bytes_hex(const u8* input, const DisplayConfig cfg) {
     assert(cfg.line_width != 0);
 
     for (size_t i = 0; i < cfg.line_width; i++) {
-        unsigned char c = input[i];
+        u8 c = input[i];
         if (c == 0x00)
             fprintf(cfg.out, KWHT);
         else if (c == 0xff)
@@ -58,11 +58,11 @@ void display_bytes_hex(const char* input, const DisplayConfig cfg) {
 }
 
 // displays non printable characters as dots
-void display_bytes_ascii(const char* line, const DisplayConfig cfg) {
+void display_bytes_ascii(const u8* line, const DisplayConfig cfg) {
     assert(cfg.line_width != 0);
 
     for (size_t i = 0; i < cfg.line_width; i++) {
-        unsigned char c = line[i];
+        u8 c = line[i];
         if (c == 0x00)
             fprintf(cfg.out, KWHT);
         else if (c == 0xff)
@@ -82,7 +82,7 @@ void display_bytes_ascii(const char* line, const DisplayConfig cfg) {
 
 int main(void) {
     const DisplayConfig cfg = default_config();
-    char* line = calloc(cfg.line_width + 1, 1);
+    u8* line = calloc(cfg.line_width + 1, 1);
     u32 offset = 0;
     size_t bytes_read;
 
@@ -104,7 +104,7 @@ DisplayConfig default_config(void) {
     return (DisplayConfig){.line_width = 16, .in = stdin, .out = stdout};
 }
 
-bool is_printable(char c) {
+bool is_printable(u8 c) {
     // below are control characters, above (0x7f) is DEL
     return (c >= 0x20 && c <= 0x7e);
 }
