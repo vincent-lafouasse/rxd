@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <stdarg.h>
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -38,11 +38,18 @@ void display_bytes_hex(const char* input, const DisplayConfig cfg) {
     assert(cfg.line_width != 0);
 
     for (size_t i = 0; i < cfg.line_width; i++) {
-        if (is_printable(input[i]))
+        unsigned char c = input[i];
+        if (c == 0x00)
+            fprintf(cfg.out, KWHT);
+        else if (c == 0xff)
+            fprintf(cfg.out, KBLU);
+        else if (isspace(c))
+            fprintf(cfg.out, KYEL);
+        else if (is_printable(c))
             fprintf(cfg.out, KGRN);
         else
-            fprintf(cfg.out, KYEL);
-        fprintf(cfg.out, "%02x", (u32)input[i]);
+            fprintf(cfg.out, KRED);
+        fprintf(cfg.out, "%02x", (u32)c);
         fprintf(cfg.out, KNRM);
         if (i % 2 == 1) {
             fprintf(cfg.out, " ");
