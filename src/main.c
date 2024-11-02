@@ -4,6 +4,63 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KWHT  "\x1B[37m"
+
+enum Color {
+    WHITE,
+    BLUE,
+    GREEN,
+    RED,
+    YELLOW,
+};
+
+int fprintf_colored(enum Color color, FILE* f, const char *format, ...)
+{
+    switch (color) {
+        case WHITE:
+            fprintf(f, KWHT);
+            break;
+        case BLUE:
+            fprintf(f, KBLU);
+            break;
+        case GREEN:
+            fprintf(f, KGRN);
+            break;
+        case RED:
+            fprintf(f, KRED);
+            break;
+        case YELLOW:
+            fprintf(f, KYEL);
+            break;
+        default:
+            fprintf(f, KNRM);
+    }
+
+    va_list args;
+    va_start(args, format);
+    int status = fprintf(f, format, args);
+    va_end(args);
+
+    fprintf(f, KNRM);
+
+    return status;
+}
+
+/*
+0x00 = white
+0xff = blue
+printable = green
+non-printable = red
+tabs and linebreaks = yellow
+*/
 
 typedef uint8_t u8;
 typedef uint32_t u32;
@@ -35,8 +92,10 @@ void display_bytes_ascii(const char* line, const DisplayConfig cfg) {
     assert(cfg.line_width != 0);
 
     for (size_t i = 0; line[i] && i < cfg.line_width; i++) {
-        char to_print = is_printable(line[i]) ? line[i] : '.';
-        printf("%c", to_print);
+        if (is_printable(line[i]))
+            fprintf_colored(GREEN, cfg.out, "%c", line[i]);
+        else
+            fprintf_colored(YELLOW, cfg.out, ".");
     }
 }
 
