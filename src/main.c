@@ -19,8 +19,10 @@ void putstr(const char* s, int fd);
 void mem_reverse(void* __bytes, size_t n);
 bool is_printable(char c);
 
+void display_bytes_hex(const char* input, const DisplayConfig cfg);
+
 // displays non printable characters as dots
-void display_ascii_with_dots(const char* input, const DisplayConfig cfg) {
+void display_bytes_ascii(const char* input, const DisplayConfig cfg) {
     assert(cfg.line_width != 0);
     char* line = calloc(cfg.line_width + 1, 1);
     strncpy(line, input, cfg.line_width);
@@ -36,7 +38,7 @@ void display_ascii_with_dots(const char* input, const DisplayConfig cfg) {
 }
 
 void display_hex(u32 n, const DisplayConfig cfg) {
-    size_t width = 2 * sizeof(n); // 2 hex per byte
+    size_t width = 2 * sizeof(n);  // 2 hex per byte
 
     char* buffer = malloc(width + 1);
     memset(buffer, '0', width);
@@ -66,7 +68,7 @@ int main(void) {
         display_hex(offset, cfg);
         putstr(": ", cfg.fd_out);
         offset += bytes_read;
-        display_ascii_with_dots(line, cfg);
+        display_bytes_ascii(line, cfg);
         putstr("\n", cfg.fd_out);
         memset(line, 0, cfg.line_width + 1);
         bytes_read = read(cfg.fd_in, line, cfg.line_width);
