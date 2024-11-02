@@ -35,7 +35,7 @@ void display_bytes_hex(const char* input, const DisplayConfig cfg) {
         buffer[3 * i + 1] = LOWERCASE_HEX[byte % 16];
         buffer[3 * i + 2] = ' ';
     }
-    putstr(buffer, cfg.fd_out);
+    fprintf(cfg.out, "%s", buffer);
     free(buffer);
 }
 
@@ -51,7 +51,7 @@ void display_bytes_ascii(const char* input, const DisplayConfig cfg) {
         }
     }
 
-    putstr(line, cfg.fd_out);
+    fprintf(cfg.out, "%s", line);
     free(line);
 }
 
@@ -71,37 +71,33 @@ void display_u32_hex(u32 n, const DisplayConfig cfg) {
         n = n / 16;
     }
     mem_reverse(buffer, width);
-    putstr(buffer, cfg.fd_out);
+    fprintf(cfg.out, "%s", buffer);
     free(buffer);
 }
 
 int main(void) {
     const DisplayConfig cfg = default_config();
     char* line = calloc(cfg.line_width + 1, 1);
-    size_t bytes_read;
     u32 offset = 0;
+    size_t bytes_read;
 
-    bytes_read = read(cfg.fd_in, line, cfg.line_width);
+    bytes_read = fread(line, cfg.line_width, 1, cfg.in);
     while (bytes_read > 0) {
         display_u32_hex(offset, cfg);
-        putstr(": ", cfg.fd_out);
+        fprintf(cfg.out, ": ");
         offset += bytes_read;
         display_bytes_hex(line, cfg);
-        putstr(" ", cfg.fd_out);
+        fprintf(cfg.out, " ");
         display_bytes_ascii(line, cfg);
-        putstr("\n", cfg.fd_out);
+        fprintf(cfg.out, "\n");
         memset(line, 0, cfg.line_width + 1);
-        bytes_read = read(cfg.fd_in, line, cfg.line_width);
+        bytes_read = fread(line, cfg.line_width, 1, cfg.in);
     }
     free(line);
 }
 
 DisplayConfig default_config(void) {
     return (DisplayConfig){.line_width = 16, .in = stdin, .out = stdout};
-}
-
-void putstr(const char* s, int fd) {
-    write(fd, s, strlen(s));
 }
 
 bool is_printable(char c) {
