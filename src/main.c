@@ -21,6 +21,7 @@ typedef struct {
     size_t line_width;  // 0 means one line
     FILE* in;
     FILE* out;
+    bool autoskip;
 } DisplayConfig;
 
 DisplayConfig default_config(void);
@@ -62,28 +63,48 @@ void display_bytes_ascii(const u8* line, const DisplayConfig cfg) {
     }
 }
 
+bool is_all_zeros(const u8* line, size_t sz) {
+    for (size_t i = 0; i < sz; i++) {
+        if (line[i] != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 int main(void) {
     const DisplayConfig cfg = default_config();
     u8* line = calloc(cfg.line_width + 1, 1);
     u32 offset = 0;
     size_t bytes_read;
+    bool in_null_section = false;
 
     bytes_read = fread(line, cfg.line_width, 1, cfg.in);
     while (bytes_read > 0) {
-        fprintf(cfg.out, "%08u: ", offset);
+        if (cfg.autoskip && is_all_zeros(line, cfg.line_width)) {
+            if (!in_null_section) {
+                fprintf(cfg.out, "*\n");
+                in_null_section = true;
+            }
+        } else {
+            fprintf(cfg.out, "%08u: ", offset);
+            display_bytes_hex(line, cfg);
+            fprintf(cfg.out, " ");
+            display_bytes_ascii(line, cfg);
+            fprintf(cfg.out, "\n");
+            in_null_section = false;
+        }
         offset += bytes_read;
-        display_bytes_hex(line, cfg);
-        fprintf(cfg.out, " ");
-        display_bytes_ascii(line, cfg);
-        fprintf(cfg.out, "\n");
         memset(line, 0, cfg.line_width + 1);
         bytes_read = fread(line, cfg.line_width, 1, cfg.in);
     }
     free(line);
 }
 
+// xxd's autoskip default is false
 DisplayConfig default_config(void) {
-    return (DisplayConfig){.line_width = 16, .in = stdin, .out = stdout};
+    return (DisplayConfig){
+        .line_width = 16, .in = stdin, .out = stdout, .autoskip = true};
 }
 
 void set_correct_color(u8 c, DisplayConfig cfg) {
