@@ -37,7 +37,7 @@ void display_bytes_ascii(const char* input, const DisplayConfig cfg) {
     free(line);
 }
 
-void display_hex(u32 n, const DisplayConfig cfg) {
+void display_u32_hex(u32 n, const DisplayConfig cfg) {
     size_t width = 2 * sizeof(n);  // 2 hex per byte
 
     char* buffer = malloc(width + 1);
@@ -65,7 +65,7 @@ int main(void) {
 
     bytes_read = read(cfg.fd_in, line, cfg.line_width);
     while (bytes_read > 0) {
-        display_hex(offset, cfg);
+        display_u32_hex(offset, cfg);
         putstr(": ", cfg.fd_out);
         offset += bytes_read;
         display_bytes_ascii(line, cfg);
