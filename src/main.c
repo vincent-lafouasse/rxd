@@ -1,12 +1,15 @@
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+typedef uint8_t u8;
+typedef uint32_t u32;
+
 typedef struct {
     size_t line_width;  // 0 means one line
-    size_t offset_width; // number of hex digits
     int fd_in;
     int fd_out;
 } DisplayConfig;
@@ -32,14 +35,8 @@ void display_ascii_with_dots(const char* input, const DisplayConfig cfg) {
     free(line);
 }
 
-void display_hex(size_t n, const DisplayConfig cfg) {
-    size_t width = cfg.offset_width;
-    /*
-    size_t max_value = (1 << (4 * width));
-    printf("max: %zu\n", max_value);
-    assert(n <= max_value);
-    */
-    // this assertion fails somehow
+void display_hex(u32 n, const DisplayConfig cfg) {
+    size_t width = sizeof(n);
 
     char* buffer = malloc(width + 1);
     memset(buffer, '0', width);
@@ -62,7 +59,7 @@ int main(void) {
     const DisplayConfig cfg = default_config();
     char* line = calloc(cfg.line_width + 1, 1);
     size_t bytes_read;
-    size_t offset = 0;
+    u32 offset = 0;
 
     bytes_read = read(cfg.fd_in, line, cfg.line_width);
     while (bytes_read > 0) {
@@ -78,10 +75,8 @@ int main(void) {
 }
 
 DisplayConfig default_config(void) {
-    return (DisplayConfig){.line_width = 16,
-                           .offset_width = 8,
-                           .fd_in = STDIN_FILENO,
-                           .fd_out = STDOUT_FILENO};
+    return (DisplayConfig){
+        .line_width = 16, .fd_in = STDIN_FILENO, .fd_out = STDOUT_FILENO};
 }
 
 void putstr(const char* s, int fd) {
@@ -94,10 +89,10 @@ bool is_printable(char c) {
 }
 
 void mem_reverse(void* __bytes, size_t n) {
-    unsigned char* bytes = __bytes;
+    u8* bytes = __bytes;
 
     for (size_t i = 0; i < n / 2; i++) {
-        unsigned char tmp = bytes[i];
+        u8 tmp = bytes[i];
         bytes[i] = bytes[n - 1 - i];
         bytes[n - 1 - i] = tmp;
     }
